@@ -45,6 +45,8 @@ server <- function(input, output, session) {
       output$peak <- renderPlot({Voigt.plot(
         Voigt.df(x = df.range()$x, I = df.range()$I, result()$par)
       )})
+      
+      output$pbo.plot <- renderPlot({plot(result()$pbo)})
 
       
       

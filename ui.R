@@ -19,7 +19,8 @@ shinyUI(
       mainPanel(
         tabsetPanel(type = "tabs",
                     tabPanel("Table", DT::dataTableOutput("table")),
-                    tabPanel("Peak", plotOutput("peak"))
+                    tabPanel("Peak", plotOutput("peak")),
+                    tabPanel("Optim", plotOutput("pbo.plot"))
                     
         )
       )

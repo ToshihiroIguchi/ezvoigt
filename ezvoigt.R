@@ -1,7 +1,15 @@
 library(RcppFaddeeva)
-library(pso)
 library(ggplot2)
 
+library(DEoptim)
+library(pso)
+library(GA)
+
+source("pboptim.R")
+source("randomsearch.R")
+
+
+as.vec <- function(df){as.vector(as.matrix(df))}
 
 Voigt2 <- function(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
   #2つのフォークト関数を作る
@@ -18,13 +26,13 @@ Voigt2 <- function(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
 }
 
 Voigt.opt <- function(x, I, maxit = 100, s = 16){
-  Voigt.e2 <- function(x, I, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
+  Voigt.rmse <- function(x, I, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
     calc <- Voigt2(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2)$v
-    e2 <- sum((I - calc)^2)
-    return(e2)
+    rmse <- sqrt(sum((I - calc)^2)/length(I))
+    return(rmse)
   }
   min.fn <- function(y){
-    log(Voigt.e2(x = x, I = I, a1 = y[1], a2 = y[2], p1 = y[3], p2 = y[4],
+    (Voigt.rmse(x = x, I = I, a1 = y[1], a2 = y[2], p1 = y[3], p2 = y[4],
                  sigma1 = y[5], sigma2 = y[6], gamma1 = y[7], gamma2 = y[8]))
   }
   lower <- c(rep(0, 2), rep(min(x), 2), rep(1e-5, 4))
@@ -33,27 +41,27 @@ Voigt.opt <- function(x, I, maxit = 100, s = 16){
   #The swarm size. Defaults to floor(10+2*sqrt(length(par))) unless type is “SPSO2011” in which case the default is 40.
   #The maximum number of iterations. Defaults to 1000.
   
-  result.pso <- psoptim(par = rep(NA,8), 
-                        fn = min.fn,
-                        lower = lower, upper = upper,
-                        control = list(
-                          #trace = 1,
-                          maxit = maxit, s = s
-                          
-                          ))
-  
-  result.opt <- optim(par = result.pso$par,
+  result.pbo <- pboptim(fn = min.fn,
+                        method = c("DEO","PSO","GA","RS"),
+                        population = 20, generation = 100,
+                        lower = lower, upper = upper, trace = FALSE)
+
+  result.opt <- optim(par = as.vec(result.pbo$bestpar),
                       fn = min.fn)
+
+  result <- list(pso = result.pbo, optim = result.opt)
+
   
-  result <- list(pso = result.pso, optim = result.opt)
-  
-  if(result.pso$value < result.opt$value){
-    result$par <- result.pso$par
-    result$value <- result.pso$value
+  if(result.pbo$bestvalue < result.opt$value){
+    result$par <- result.pbo$bestpar
+    result$value <- result.pbo$bestvalue
   }else{
     result$par <- result.opt$par
     result$value <- result.opt$value
   }
+  
+  print(result)
+  
   return(result)
 }
 
