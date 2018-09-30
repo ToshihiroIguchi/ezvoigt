@@ -84,12 +84,56 @@ Voigt.plot <- function(data){
     geom_line(aes(y = v), color = "red")
 }
 
+Voigt.FWHM <- function(sigma, gamma, method = "BFGS"){
+  
+  #peak
+  peak.I <- Voigt(0, 0, sigma, gamma)
+  
+  #width to height
+  width.height <- function(w){Voigt(abs(w/2), 0, sigma, gamma)}
+  
+  #minimize fn
+  fn <- function(w){
+    e2 <- 1e10*(peak.I/2 - width.height(w))^2
+    return(e2)
+  }
+  
+  #optimize
+  result <- optim(par = sigma+gamma, fn, method = method)
+
+  #return
+  ret <- abs(result$par)
+  return(ret)
+}
+
 summary.Voigt.opt <- function(result){
   par <- result$par
   rmse <- exp(result$value)
-  print(par)
-  print(rmse)
   
+  a1 <- par[1]
+  a2 <- par[2]
+  p1 <- par[3]
+  p2 <- par[4]
+  sigma1 <- par[5]
+  sigma2 <- par[6]
+  gamma1 <- par[7]
+  gamma2 <- par[8]
+  
+  df <- data.frame(Voigt1 = par[c(1,3,5,7)], Voigt2 = par[c(2,4,6,8)])
+  df <- rbind(df, 
+              data.frame(
+                Voigt1 = Voigt.FWHM(sigma1, gamma1), 
+                Voigt2 = Voigt.FWHM(sigma2, gamma2)
+                )
+              )
+  df <- rbind(df,
+              data.frame(
+                Voigt1 = Voigt(0, 0, sigma1, gamma1),
+                Voigt2 = Voigt(0, 0 ,sigma2, gamma2)
+              ))
+  
+  
+  #row.names(df) <- c("a", "x", "sigma", "gamma", "FWHM", "Peak")
   
 }
 
