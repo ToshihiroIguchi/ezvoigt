@@ -1,15 +1,7 @@
 library(RcppFaddeeva)
+library(pso)
 library(ggplot2)
 
-library(DEoptim)
-library(pso)
-library(GA)
-
-source("pboptim.R")
-source("randomsearch.R")
-
-
-as.vec <- function(df){as.vector(as.matrix(df))}
 
 Voigt2 <- function(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
   #2つのフォークト関数を作る
@@ -25,14 +17,14 @@ Voigt2 <- function(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
   return(ret)
 }
 
-Voigt.opt <- function(x, I, maxit = 100, s = 16){
+Voigt.opt <- function(x, I, maxit = 300, s = 20){
   Voigt.rmse <- function(x, I, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
     calc <- Voigt2(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2)$v
     rmse <- sqrt(sum((I - calc)^2)/length(I))
     return(rmse)
   }
   min.fn <- function(y){
-    (Voigt.rmse(x = x, I = I, a1 = y[1], a2 = y[2], p1 = y[3], p2 = y[4],
+    log(Voigt.rmse(x = x, I = I, a1 = y[1], a2 = y[2], p1 = y[3], p2 = y[4],
                  sigma1 = y[5], sigma2 = y[6], gamma1 = y[7], gamma2 = y[8]))
   }
   lower <- c(rep(0, 2), rep(min(x), 2), rep(1e-5, 4))
@@ -41,27 +33,27 @@ Voigt.opt <- function(x, I, maxit = 100, s = 16){
   #The swarm size. Defaults to floor(10+2*sqrt(length(par))) unless type is “SPSO2011” in which case the default is 40.
   #The maximum number of iterations. Defaults to 1000.
   
-  result.pbo <- pboptim(fn = min.fn,
-                        method = c("DEO","PSO","GA","RS"),
-                        population = 20, generation = 100,
-                        lower = lower, upper = upper, trace = FALSE)
-
-  result.opt <- optim(par = as.vec(result.pbo$bestpar),
-                      fn = min.fn)
-
-  result <- list(pso = result.pbo, optim = result.opt)
-
+  result.pso <- psoptim(par = rep(NA,8), 
+                        fn = min.fn,
+                        lower = lower, upper = upper,
+                        control = list(
+                          #trace = 1,trace.stats = TRUE,REPORT = 1,
+                          maxit = maxit, s = s
+                          
+                        ))
   
-  if(result.pbo$bestvalue < result.opt$value){
-    result$par <- result.pbo$bestpar
-    result$value <- result.pbo$bestvalue
+  result.opt <- optim(par = result.pso$par, fn = min.fn)
+  
+  result <- list(pso = result.pso, optim = result.opt)
+  
+  if(result.pso$value < result.opt$value || min(result.opt$par[-c(3,4)]) < 0){
+    result$par <- result.pso$par
+    result$value <- result.pso$value
   }else{
     result$par <- result.opt$par
     result$value <- result.opt$value
   }
-  
-  print(result)
-  
+  class(result) <- "Voigt.opt"
   return(result)
 }
 
@@ -75,13 +67,14 @@ Voigt.df <- function(x, I, par){
   gamma1 <- par[7]
   gamma2 <- par[8]
   ret.df <- Voigt2(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2)
-
+  
   ret.df <- data.frame(ret.df, I = I)
   return(ret.df)
 }
 
 Voigt.plot <- function(data){
   #https://qiita.com/kazutan/items/3b982eb589dcc12cee54
+  
   ggplot(data, aes(x)) + 
     xlab(NULL) +
     ylab("Intensity") +
@@ -89,6 +82,15 @@ Voigt.plot <- function(data){
     geom_line(aes(y = v1), color = "blue") +
     geom_line(aes(y = v2), color = "green") +
     geom_line(aes(y = v), color = "red")
+}
+
+summary.Voigt.opt <- function(result){
+  par <- result$par
+  rmse <- exp(result$value)
+  print(par)
+  print(rmse)
+  
+  
 }
 
 

@@ -18,44 +18,46 @@ server <- function(input, output, session) {
       output$Intensity <- renderUI({
         selectInput("Intensity", "Intensity", 
                     choices = colnames(data()))})
-      
-      x <- reactive({data()[, input$xaxis]})
-      I <- reactive({data()[, input$Intensity]})
-      
-      df <- reactive({data.frame(x = x(), I = I())})
-      
-      x.min <- reactive({min(x())})
-      x.max <- reactive({max(x())})
-      
-      
-      output$x.min <- renderUI({
-        numericInput("x.min", "Min", value = x.min(), min = x.min(), max = x.max())
-      })
-      
-      output$x.max <- renderUI({
-        numericInput("x.max", "Max", value = x.max(), min = x.min(), max = x.max())
-      })
-      
-      df.range <- reactive({subset(df(), x >= x.min() && x <= x.max())})
-      
-      result <- reactive({
-        Voigt.opt(x = df.range()$x, I = df.range()$I)
-      })
-      
-      output$peak <- renderPlot({Voigt.plot(
-        Voigt.df(x = df.range()$x, I = df.range()$I, result()$par)
-      )})
-      
-      output$pbo.plot <- renderPlot({plot(result()$pbo)})
 
+      observeEvent(input$xaxis, {
+        
+        x <- reactive({data()[, input$xaxis]})
+        I <- reactive({data()[, input$Intensity]})
+        
+        df <- reactive({data.frame(x = x(), I = I())})
+        
+        output$x.min <- renderUI({
+          numericInput("x.min", "Min", value = min(x()), min = min(x()), max = max(x()))
+        })
+        
+        output$x.max <- renderUI({
+          numericInput("x.max", "Max", value = max(x()), min = min(x()), max = max(x()))
+        })
+        
+        df.range <- reactive({subset(df(), x>=input$x.min & x<=input$x.max)})
+        
+        result <- reactive({
+          Voigt.opt(x = df.range()$x, I = df.range()$I)
+        })
+        
+        output$peak <- renderPlot({
+          Voigt.plot(Voigt.df(x = df.range()$x, I = df.range()$I, result()$par)
+        )})
+        
+        output$sum <- renderPrint(({summary(result())}))
+
+      })
+      
+      
+      
+      
       
       
       
     })
-
-   
-
-
+    
+    
+    
+    
   })
 }
-
