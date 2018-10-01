@@ -37,7 +37,8 @@ server <- function(input, output, session) {
         df.range <- reactive({subset(df(), x>=input$x.min & x<=input$x.max)})
         
         result <- reactive({
-          Voigt.opt(x = df.range()$x, I = df.range()$I)
+          Voigt.opt(x = df.range()$x, I = df.range()$I, 
+                    maxit = input$maxit, s = input$s)
         })
         
         output$peak <- renderPlot({

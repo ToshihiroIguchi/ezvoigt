@@ -20,7 +20,13 @@ shinyUI(
         tabsetPanel(type = "tabs",
                     tabPanel("Table", DT::dataTableOutput("table")),
                     tabPanel("Peak", plotOutput("peak"), verbatimTextOutput("sum")),
-                    tabPanel("Setting")
+                    tabPanel("Setting", 
+                             numericInput("maxit", "The maximum number of iterations", 
+                                          value = 500, min = 3),
+                             numericInput("s", "The swarm size", 
+                                          value = 20, min = 10)
+                    )
+                             
                     
         )
       )

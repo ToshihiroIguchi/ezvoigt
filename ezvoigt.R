@@ -128,12 +128,13 @@ summary.Voigt.opt <- function(result){
               )
   df <- rbind(df,
               data.frame(
-                Voigt1 = Voigt(0, 0, sigma1, gamma1),
-                Voigt2 = Voigt(0, 0 ,sigma2, gamma2)
+                Voigt1 = a1*Voigt(0, 0, sigma1, gamma1),
+                Voigt2 = a2*Voigt(0, 0 ,sigma2, gamma2)
               ))
   
   
-  #row.names(df) <- c("a", "x", "sigma", "gamma", "FWHM", "Peak")
+  rownames(df) <- c("a", "x", "sigma", "gamma", "FWHM", "Peak")
+  return(df)
   
 }
 
