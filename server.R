@@ -6,6 +6,9 @@ source("ezvoigt.R")
 server <- function(input, output, session) {
   
   observeEvent(input$file, {
+    
+    print(input$file$name)
+    
     data <- reactive({read.csv(input$file$datapath)})
     output$table <- DT::renderDataTable(data())
     

@@ -138,6 +138,17 @@ summary.Voigt.opt <- function(result){
   
 }
 
-
+#後で修正
+read.profile <- function(file){
+  if(length(grep("\\.csv$", tolower(file)))){
+    return(read.csv(file))
+  }
+  if(length(grep("\\.asc$", tolower(file)))){
+    return(read.delim(file))
+  }
+  
+  return(NULL)
+  
+}
 
 
