@@ -9,18 +9,20 @@ server <- function(input, output, session) {
     
     print(input$file$name)
     
-    data <- reactive({read.csv(input$file$datapath)})
+    data <- reactive({read.profile(input$file$datapath)})
     output$table <- DT::renderDataTable(data())
     
     observeEvent(data(), {
       
       output$xaxis <- renderUI({
         selectInput("xaxis", "x-axis",
-                    choices = colnames(data()))})
+                    choices = colnames(data()),
+                    selected = colnames(data())[1] )})
       
       output$Intensity <- renderUI({
         selectInput("Intensity", "Intensity", 
-                    choices = colnames(data()))})
+                    choices = colnames(data()),
+                    selected = colnames(data())[2] )})
 
       observeEvent(input$xaxis, {
         

@@ -1,5 +1,8 @@
 
-file.input.accept <- c("text/csv", "text/comma-separated-values,text/plain", ".csv")
+file.input.accept <- c("text/csv", 
+                       "text/comma-separated-values,text/plain", 
+                       ".csv", ".ASC", ".int")
+
 
 shinyUI(
   fluidPage(

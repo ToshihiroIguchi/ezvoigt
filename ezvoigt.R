@@ -138,17 +138,19 @@ summary.Voigt.opt <- function(result){
   
 }
 
-#後で修正
 read.profile <- function(file){
+  ret <- NULL
   if(length(grep("\\.csv$", tolower(file)))){
-    return(read.csv(file))
+    ret <- (read.csv(file))
   }
   if(length(grep("\\.asc$", tolower(file)))){
-    return(read.delim(file))
+    ret <- (read.table(file, skip = 0))
+  }
+  if(length(grep("\\.int$", tolower(file)))){
+    ret <- (read.table(file, skip = 2))
   }
   
-  return(NULL)
-  
+  if(length(ret[1, ]) < 2){return(NULL)}
+  return(ret)
 }
-
 
