@@ -22,7 +22,11 @@ shinyUI(
       mainPanel(
         tabsetPanel(type = "tabs",
                     tabPanel("Table", DT::dataTableOutput("table")),
-                    tabPanel("Peak", plotOutput("peak"), verbatimTextOutput("sum")),
+                    tabPanel("Peak", plotOutput("peak"), 
+                             fluidRow(
+                               column(4, verbatimTextOutput("sum")),
+                               column(8, DT::dataTableOutput("Voigt.table"))
+                             )),
                     tabPanel("Setting", 
                              numericInput("maxit", "The maximum number of iterations", 
                                           value = 500, min = 3),

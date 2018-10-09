@@ -50,20 +50,14 @@ server <- function(input, output, session) {
           Voigt.plot(Voigt.df(x = df.range()$x, I = df.range()$I, result()$par)
         )})
         
-        output$sum <- renderPrint(({summary(result())}))
-
+        output$Voigt.table <- DT::renderDataTable({
+          datatable(table.Voigt.opt(result()), options = list(dom = 't'))
+          })
+        
+        output$sum <- renderPrint({(result())})
       })
-      
-      
-      
-      
-      
-      
-      
+
     })
-    
-    
-    
-    
+
   })
 }

@@ -17,6 +17,22 @@ Voigt2 <- function(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
   return(ret)
 }
 
+is.ascending.order <- function(vec){
+  true.n <- sum(sort(vec) != vec)
+  if(true.n == 0){return(TRUE)}else{return(FALSE)}
+}
+
+integral.strength <- function(x, I){
+  if(!is.ascending.order(x)){return(NULL)}
+  if(length(x) != length(I)){return(NULL)}
+  
+  num <- length(x)
+  
+  #Integral Strength
+  ret <- sum(diff(x) * (I[-1] + I[-num])/2)
+  return(ret)
+}
+
 Voigt.opt <- function(x, I, maxit = 300, s = 20){
   Voigt.rmse <- function(x, I, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
     calc <- Voigt2(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2)$v
@@ -27,8 +43,11 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20){
     log(Voigt.rmse(x = x, I = I, a1 = y[1], a2 = y[2], p1 = y[3], p2 = y[4],
                  sigma1 = y[5], sigma2 = y[6], gamma1 = y[7], gamma2 = y[8]))
   }
+  
+  is <- integral.strength(x, I)
+  
   lower <- c(rep(0, 2), rep(min(x), 2), rep(1e-5, 4))
-  upper <- c(rep(sum(I), 2), rep(max(x), 2), rep(max(x) - min(x), 4))
+  upper <- c(rep(is*2, 2), rep(max(x), 2), rep(max(x) - min(x), 4))
   
   #The swarm size. Defaults to floor(10+2*sqrt(length(par))) unless type is “SPSO2011” in which case the default is 40.
   #The maximum number of iterations. Defaults to 1000.
@@ -44,7 +63,7 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20){
   
   result.opt <- optim(par = result.pso$par, fn = min.fn)
   
-  result <- list(pso = result.pso, optim = result.opt)
+  result <- list(integral.strength = is, pso = result.pso, optim = result.opt)
   
   if(result.pso$value < result.opt$value || min(result.opt$par[-c(3,4)]) < 0){
     result$par <- result.pso$par
@@ -106,7 +125,7 @@ Voigt.FWHM <- function(sigma, gamma, method = "BFGS"){
   return(ret)
 }
 
-summary.Voigt.opt <- function(result){
+table.Voigt.opt <- function(result){
   par <- result$par
   rmse <- exp(result$value)
   
@@ -133,8 +152,15 @@ summary.Voigt.opt <- function(result){
               ))
   
   
-  rownames(df) <- c("a", "x", "sigma", "gamma", "FWHM", "Peak")
+  rownames(df) <- c("Integral_strength", "Peak_position", 
+                    "sigma", "gamma", "FWHM", "Peak_intensity")
   return(df)
+  
+}
+
+summary.Voigt.opt <- function(result){
+  
+  print(table.Voigt.opt(result))
   
 }
 
@@ -153,4 +179,3 @@ read.profile <- function(file){
   if(length(ret[1, ]) < 2){return(NULL)}
   return(ret)
 }
-
