@@ -28,6 +28,7 @@ shinyUI(
                                column(8, DT::dataTableOutput("Voigt.table"))
                              )),
                     tabPanel("Setting", 
+                             h4("Particle Swarm Optimizer"),
                              numericInput("maxit", "The maximum number of iterations", 
                                           value = 500, min = 3),
                              numericInput("s", "The swarm size", 

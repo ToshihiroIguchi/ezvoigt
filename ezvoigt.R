@@ -47,7 +47,7 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20){
   is <- integral.strength(x, I)
   
   lower <- c(rep(0, 2), rep(min(x), 2), rep(1e-5, 4))
-  upper <- c(rep(is*2, 2), rep(max(x), 2), rep(max(x) - min(x), 4))
+  upper <- c(rep(is*2, 2), rep(max(x), 2), rep((max(x) - min(x))/2, 4))
   
   #The swarm size. Defaults to floor(10+2*sqrt(length(par))) unless type is “SPSO2011” in which case the default is 40.
   #The maximum number of iterations. Defaults to 1000.
