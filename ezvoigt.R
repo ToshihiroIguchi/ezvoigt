@@ -33,7 +33,10 @@ integral.strength <- function(x, I){
   return(ret)
 }
 
-Voigt.opt <- function(x, I, maxit = 300, s = 20){
+Voigt.opt <- function(x, I, maxit = 300, s = 20, peak.range =NULL){
+  
+  if(is.null(peak.range)){peak.range <- c(min(x), max(x))}
+  
   Voigt.rmse <- function(x, I, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2){
     calc <- Voigt2(x, a1, a2, p1, p2, sigma1, sigma2, gamma1, gamma2)$v
     rmse <- sqrt(sum((I - calc)^2)/length(I))
@@ -46,8 +49,8 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20){
   
   is <- integral.strength(x, I)
   
-  lower <- c(rep(0, 2), rep(min(x), 2), rep(1e-5, 4))
-  upper <- c(rep(is*2, 2), rep(max(x), 2), rep((max(x) - min(x))/2, 4))
+  lower <- c(rep(0, 2), rep(peak.range[1], 2), rep(1e-5, 4))
+  upper <- c(rep(is*2, 2), rep(peak.range[2], 2), rep((max(x) - min(x))/2, 4))
   
   #The swarm size. Defaults to floor(10+2*sqrt(length(par))) unless type is “SPSO2011” in which case the default is 40.
   #The maximum number of iterations. Defaults to 1000.
@@ -72,6 +75,7 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20){
     result$par <- result.opt$par
     result$value <- result.opt$value
   }
+  
   class(result) <- "Voigt.opt"
   return(result)
 }
@@ -91,8 +95,12 @@ Voigt.df <- function(x, I, par){
   return(ret.df)
 }
 
-Voigt.plot <- function(data){
+Voigt.plot <- function(data, text.size = 15){
   #https://qiita.com/kazutan/items/3b982eb589dcc12cee54
+  
+  gp.common <-  theme(axis.title.x = element_text(size = text.size),
+                      axis.title.y = element_text(size = text.size),
+                      text = element_text(size = text.size))
   
   ggplot(data, aes(x)) + 
     xlab(NULL) +
@@ -100,7 +108,8 @@ Voigt.plot <- function(data){
     geom_point(aes(y = I), color = "black", size = 1) +
     geom_line(aes(y = v1), color = "blue") +
     geom_line(aes(y = v2), color = "green") +
-    geom_line(aes(y = v), color = "red")
+    geom_line(aes(y = v), color = "red") +
+    gp.common
 }
 
 Voigt.FWHM <- function(sigma, gamma, method = "BFGS"){
@@ -179,3 +188,9 @@ read.profile <- function(file){
   if(length(ret[1, ]) < 2){return(NULL)}
   return(ret)
 }
+
+
+
+
+
+

@@ -16,7 +16,8 @@ shinyUI(
         htmlOutput("xaxis"),
         htmlOutput("Intensity"),
         htmlOutput("x.min"),
-        htmlOutput("x.max")
+        htmlOutput("x.max"),
+        htmlOutput("peak.range")
       ),
       
       mainPanel(
@@ -30,9 +31,15 @@ shinyUI(
                     tabPanel("Setting", 
                              h4("Particle Swarm Optimizer"),
                              numericInput("maxit", "The maximum number of iterations", 
-                                          value = 500, min = 3),
+                                          value = 200, min = 3),
                              numericInput("s", "The swarm size", 
-                                          value = 20, min = 10)
+                                          value = 20, min = 10),
+                             
+                             tags$hr(),
+                             h4("Graph"),
+                             sliderInput("font.size", "Font size", 
+                                         value = 15,
+                                         min = 5, max = 30)
                     )
                              
                     
