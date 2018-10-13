@@ -25,15 +25,26 @@ shinyUI(
                     tabPanel("Table", DT::dataTableOutput("table")),
                     tabPanel("Peak", plotOutput("peak"), 
                              fluidRow(
-                               column(4, verbatimTextOutput("sum")),
-                               column(8, DT::dataTableOutput("Voigt.table"))
+                               column(6, verbatimTextOutput("sum")),
+                               column(6, DT::dataTableOutput("Voigt.table"))
                              )),
                     tabPanel("Setting", 
                              h4("Particle Swarm Optimizer"),
+                             h5("Global optimization"),
                              numericInput("maxit", "The maximum number of iterations", 
                                           value = 200, min = 3),
                              numericInput("s", "The swarm size", 
                                           value = 20, min = 10),
+                             
+                             tags$hr(),
+                             h4("General-purposec Optimization"),
+                             h5("Loal optimization"),
+                             
+                             
+                             selectInput("opt.method", 
+                                         "method", 
+                                         choices = c("Nelder-Mead", "BFGS", 
+                                                     "CG", "L-BFGS-B", "SANN")),
                              
                              tags$hr(),
                              h4("Graph"),

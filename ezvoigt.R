@@ -33,7 +33,8 @@ integral.strength <- function(x, I){
   return(ret)
 }
 
-Voigt.opt <- function(x, I, maxit = 300, s = 20, peak.range =NULL){
+Voigt.opt <- function(x, I, maxit = 300, s = 20, peak.range =NULL,
+                      method = "Nelder-Mead"){
   
   if(is.null(peak.range)){peak.range <- c(min(x), max(x))}
   
@@ -49,7 +50,7 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20, peak.range =NULL){
   
   is <- integral.strength(x, I)
   
-  lower <- c(rep(0, 2), rep(peak.range[1], 2), rep(1e-5, 4))
+  lower <- c(rep(0, 2), rep(peak.range[1], 2), rep(1e-10, 4))
   upper <- c(rep(is*2, 2), rep(peak.range[2], 2), rep((max(x) - min(x))/2, 4))
   
   #The swarm size. Defaults to floor(10+2*sqrt(length(par))) unless type is “SPSO2011” in which case the default is 40.
@@ -64,7 +65,7 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20, peak.range =NULL){
                           
                         ))
   
-  result.opt <- optim(par = result.pso$par, fn = min.fn)
+  result.opt <- optim(par = result.pso$par, fn = min.fn, method = method)
   
   result <- list(integral.strength = is, pso = result.pso, optim = result.opt)
   
@@ -188,7 +189,6 @@ read.profile <- function(file){
   if(length(ret[1, ]) < 2){return(NULL)}
   return(ret)
 }
-
 
 
 
