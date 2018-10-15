@@ -70,24 +70,9 @@ server <- function(input, output, session) {
                 formatRound(c("Voigt1", "Voigt2"), 3)
               
             })
-
             output$sum <- renderPrint({(result())})
-            
-            
           })
-          
-          
-          
-          
-          
-          
-          
         })
-        
-        
-        
-        
-        
       })
 
     })

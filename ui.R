@@ -44,7 +44,8 @@ shinyUI(
                              selectInput("opt.method", 
                                          "method", 
                                          choices = c("Nelder-Mead", "BFGS", 
-                                                     "CG", "L-BFGS-B", "SANN")),
+                                                     "CG", "L-BFGS-B", "SANN"),
+                                         selected = "BFGS"),
                              
                              tags$hr(),
                              h4("Graph"),
@@ -52,8 +53,6 @@ shinyUI(
                                          value = 15,
                                          min = 5, max = 30)
                     )
-                             
-                    
         )
       )
     )
