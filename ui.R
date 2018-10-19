@@ -15,9 +15,15 @@ shinyUI(
         tags$hr(),
         htmlOutput("xaxis"),
         htmlOutput("Intensity"),
-        htmlOutput("x.min"),
-        htmlOutput("x.max"),
-        htmlOutput("peak.range")
+        
+        fluidRow(
+          column(6, htmlOutput("x.min")),
+          column(6, htmlOutput("x.max"))
+        ),
+
+        htmlOutput("peak.range"),
+        htmlOutput("submit")
+        
       ),
       
       mainPanel(

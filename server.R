@@ -50,27 +50,42 @@ server <- function(input, output, session) {
             
             df.range <- reactive({subset(df(), x>=input$x.min & x<=input$x.max)})
             
-            result <- reactive({
-              Voigt.opt(x = df.range()$x, I = df.range()$I, 
-                        maxit = input$maxit, s = input$s,
-                        peak.range = input$peak.range,
-                        method = input$opt.method)
+            output$submit <- renderUI({
+              actionButton("submit", "Analyze")
             })
             
-            output$peak <- renderPlot({
-              Voigt.plot(Voigt.df(x = df.range()$x, I = df.range()$I, result()$par),
-                         text.size =input$font.size)})
             
-            output$Voigt.table <- DT::renderDataTable({
+            observeEvent(input$submit, {
               
-              #https://blog.rstudio.com/2015/06/24/dt-an-r-interface-to-the-datatables-library/
-              datatable(table.Voigt.opt(result()), 
-                        options = list(dom = "t")
-                        ) %>% 
-                formatRound(c("Voigt1", "Voigt2"), 3)
+              result <- reactive({
+                Voigt.opt(x = df.range()$x, I = df.range()$I, 
+                          maxit = input$maxit, s = input$s,
+                          peak.range = input$peak.range,
+                          method = input$opt.method)
+              })
+              
+              output$peak <- renderPlot({
+                Voigt.plot(Voigt.df(x = df.range()$x, I = df.range()$I, result()$par),
+                           text.size =input$font.size)})
+              
+              output$Voigt.table <- DT::renderDataTable({
+                
+                #https://blog.rstudio.com/2015/06/24/dt-an-r-interface-to-the-datatables-library/
+                datatable(table.Voigt.opt(result()), 
+                          options = list(dom = "t")
+                ) %>% 
+                  formatRound(c("Voigt1", "Voigt2"), 3)
+                
+              })
+              output$sum <- renderPrint({(result())})
               
             })
-            output$sum <- renderPrint({(result())})
+            
+            
+            
+            
+            
+            
           })
         })
       })
