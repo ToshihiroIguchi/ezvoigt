@@ -65,9 +65,16 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20, peak.range =NULL,
                           
                         ))
   
-  result.opt <- optim(par = result.pso$par, fn = min.fn, method = method)
+  result.opt <- try(
+    optim(par = result.pso$par, fn = min.fn, method = method), 
+    silent = TRUE)
+
+  if(class(result.opt) == "try-error"){
+    result.opt <- optim(par = result.pso$par, fn = min.fn, method = "Nelder-Mead")
+    }
   
   result <- list(integral.strength = is, pso = result.pso, optim = result.opt)
+  
   
   if(result.pso$value < result.opt$value || min(result.opt$par[-c(3,4)]) < 0){
     result$par <- result.pso$par
