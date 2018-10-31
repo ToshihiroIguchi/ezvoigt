@@ -34,7 +34,7 @@ integral.strength <- function(x, I){
 }
 
 Voigt.opt <- function(x, I, maxit = 300, s = 20, peak.range =NULL,
-                      method = "Nelder-Mead"){
+                      method = "Nelder-Mead", times = 3){
   
   if(is.null(peak.range)){peak.range <- c(min(x), max(x))}
   
@@ -53,39 +53,49 @@ Voigt.opt <- function(x, I, maxit = 300, s = 20, peak.range =NULL,
   lower <- c(rep(0, 2), rep(peak.range[1], 2), rep(1e-10, 4))
   upper <- c(rep(is*2, 2), rep(peak.range[2], 2), rep((max(x) - min(x))/2, 4))
   
-  #The swarm size. Defaults to floor(10+2*sqrt(length(par))) unless type is “SPSO2011” in which case the default is 40.
-  #The maximum number of iterations. Defaults to 1000.
+  ret <- list()
+  ret$value <- Inf
   
-  result.pso <- psoptim(par = rep(NA,8), 
-                        fn = min.fn,
-                        lower = lower, upper = upper,
-                        control = list(
-                          #trace = 1,trace.stats = TRUE,REPORT = 1,
-                          maxit = maxit, s = s
-                          
-                        ))
-  
-  result.opt <- try(
-    optim(par = result.pso$par, fn = min.fn, method = method), 
-    silent = TRUE)
-
-  if(class(result.opt) == "try-error"){
-    result.opt <- optim(par = result.pso$par, fn = min.fn, method = "Nelder-Mead")
+  for(i in 1:times){
+    
+    #The swarm size. Defaults to floor(10+2*sqrt(length(par))) unless type is “SPSO2011” in which case the default is 40.
+    #The maximum number of iterations. Defaults to 1000.
+    result.pso <- psoptim(par = rep(NA,8), 
+                          fn = min.fn,
+                          lower = lower, upper = upper,
+                          control = list(
+                            #trace = 1,trace.stats = TRUE,REPORT = 1,
+                            maxit = maxit, s = s
+                          ))
+    
+    result.opt <- try(
+      optim(par = result.pso$par, fn = min.fn, method = method), 
+      silent = TRUE)
+    
+    if(class(result.opt) == "try-error"){
+      result.opt <- optim(par = result.pso$par, fn = min.fn, method = "Nelder-Mead")
     }
-  
-  result <- list(integral.strength = is, pso = result.pso, optim = result.opt)
-  
-  
-  if(result.pso$value < result.opt$value || min(result.opt$par[-c(3,4)]) < 0){
-    result$par <- result.pso$par
-    result$value <- result.pso$value
-  }else{
-    result$par <- result.opt$par
-    result$value <- result.opt$value
+    
+    result <- list(integral.strength = is, pso = result.pso, optim = result.opt)
+    
+    
+    if(result.pso$value < result.opt$value || min(result.opt$par[-c(3,4)]) < 0){
+      result$par <- result.pso$par
+      result$value <- result.pso$value
+    }else{
+      result$par <- result.opt$par
+      result$value <- result.opt$value
+    }
+    
+    if(result$value < ret$value){ret <- result}
+
   }
   
-  class(result) <- "Voigt.opt"
-  return(result)
+  
+  
+  
+  class(ret) <- "Voigt.opt"
+  return(ret)
 }
 
 Voigt.df <- function(x, I, par){

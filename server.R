@@ -61,7 +61,8 @@ server <- function(input, output, session) {
                 Voigt.opt(x = df.range()$x, I = df.range()$I, 
                           maxit = input$maxit, s = input$s,
                           peak.range = input$peak.range,
-                          method = input$opt.method)
+                          method = input$opt.method,
+                          times = input$opt.times)
               })
               
               output$peak <- renderPlot({

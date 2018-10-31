@@ -35,10 +35,15 @@ shinyUI(
                                column(6, DT::dataTableOutput("Voigt.table"))
                              )),
                     tabPanel("Setting", 
+                             h4("Number of optimizations"),
+                             numericInput("opt.times", "Number of optimizations", 
+                                          value = 5, min = 1),
+                             tags$hr(),
+                             
                              h4("Particle Swarm Optimizer"),
                              h5("Global optimization"),
                              numericInput("maxit", "The maximum number of iterations", 
-                                          value = 200, min = 3),
+                                          value = 50, min = 3),
                              numericInput("s", "The swarm size", 
                                           value = 20, min = 10),
                              
